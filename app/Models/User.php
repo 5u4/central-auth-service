@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Webpatser\Uuid\Uuid;
 
 /**
  * Class User
@@ -20,6 +21,9 @@ class User extends Authenticatable
      * @var string
      */
     protected $dateFormat = 'U';
+
+    protected $primaryKey = 'id';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -38,4 +42,27 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        self::CREATED_AT => 'int',
+        self::UPDATED_AT => 'int',
+        'deleted_at' => 'int',
+    ];
+
+    /**
+     *  Setup model event hooks
+     */
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function (User $model) {
+            $model->id = (string)Uuid::generate(4);
+        });
+    }
 }
