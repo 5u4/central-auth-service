@@ -36,6 +36,18 @@ class AuthController extends Controller
     }
 
     /**
+     * @return JsonResponse
+     */
+    public function refreshToken(): JsonResponse
+    {
+        $accessToken  = $this->authService->getAccessToken();
+
+        return UserResource::make(Auth::user())->additional([
+            'accessToken'  => $accessToken,
+        ])->response();
+    }
+
+    /**
      * @param RegisterRequest $request
      *
      * @return JsonResponse

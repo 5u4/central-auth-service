@@ -51,15 +51,37 @@ class AuthControllerTest extends TestCase
         ]);
 
         /* Login using username */
-        $this->post('/api/v1/auth/login', [
+        $this->post('api/v1/auth/login', [
             'username' => self::TEST_USERNAME,
             'password' => self::TEST_PASSWORD,
         ])->assertStatus(Response::HTTP_OK);
 
         /* Login using email */
-        $this->post('/api/v1/auth/login', [
+        $this->post('api/v1/auth/login', [
             'email'    => self::TEST_EMAIL,
             'password' => self::TEST_PASSWORD,
+        ])->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     * @group Auth
+     */
+    public function refresh()
+    {
+        factory(User::class)->create([
+            'username' => self::TEST_USERNAME,
+            'email'    => self::TEST_EMAIL,
+            'password' => bcrypt(self::TEST_PASSWORD),
+        ]);
+
+        $refreshToken = $this->post('api/v1/auth/login', [
+            'username' => self::TEST_USERNAME,
+            'password' => self::TEST_PASSWORD,
+        ])->assertStatus(Response::HTTP_OK)->json()['refreshToken'];
+
+        $this->get('api/v1/auth/token', [
+            'Authorization' => 'Bearer ' . $refreshToken,
         ])->assertStatus(Response::HTTP_OK);
     }
 }

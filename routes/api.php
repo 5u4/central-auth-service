@@ -15,6 +15,7 @@
 Route::group(['prefix' => 'v1'], function () {
     /* Auth */
     Route::group(['prefix' => 'auth'], function () {
+        Route::get('/token', 'AuthController@refreshToken')->middleware('auth');
         Route::post('register', 'AuthController@register');
         Route::post('login', 'AuthController@login');
     });
