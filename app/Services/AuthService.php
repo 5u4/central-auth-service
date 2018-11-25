@@ -22,14 +22,7 @@ class AuthService
      */
     public function getAccessToken(): string
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        if ($user === null) {
-            throw new UnauthorizedHttpException(self::CHALLENGE, 'Not authorized');
-        }
-
-        return $this->makeToken($user->id, config('jwt.ttl.access_token'));
+        return $this->makeToken(config('jwt.ttl.access_token'));
     }
 
     /**
@@ -37,14 +30,7 @@ class AuthService
      */
     public function getRefreshToken(): string
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        if ($user === null) {
-            throw new UnauthorizedHttpException(self::CHALLENGE, 'Not authorized');
-        }
-
-        return $this->makeToken($user->id, config('jwt.ttl.refresh_token'));
+        return $this->makeToken(config('jwt.ttl.refresh_token'));
     }
 
     /**
@@ -68,13 +54,18 @@ class AuthService
     /**
      * Make a token
      *
-     * @param string $uid
      * @param int $ttl
      *
      * @return string
      */
-    private function makeToken(string $uid, int $ttl): string
+    private function makeToken(int $ttl): string
     {
+        $uid = Auth::id();
+
+        if ($uid === null) {
+            throw new UnauthorizedHttpException(self::CHALLENGE, 'Not authorized');
+        }
+
         $issueAt = time();
         $expiredAt = $issueAt + $ttl;
 

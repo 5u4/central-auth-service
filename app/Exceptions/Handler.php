@@ -2,10 +2,13 @@
 
 namespace App\Exceptions;
 
+use App\Services\AuthService;
 use Exception;
+use Firebase\JWT\ExpiredException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -55,6 +58,8 @@ class Handler extends ExceptionHandler
 
         if ($exception instanceof ValidationException) {
             throw new BadRequestHttpException(json_encode($exception->errors()), $exception);
+        } else if ($exception instanceof ExpiredException) {
+            throw new UnauthorizedHttpException(AuthService::CHALLENGE, 'Token expired');
         }
 
         return $this->prepareJsonResponse($request, $exception);
