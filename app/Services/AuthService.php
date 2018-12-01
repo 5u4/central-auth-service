@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
@@ -69,10 +70,14 @@ class AuthService
         $issueAt = time();
         $expiredAt = $issueAt + $ttl;
 
-        return JWT::encode([
+        $token = JWT::encode([
             'iat' => $issueAt,
             'exp' => $expiredAt,
             'uid' => $uid,
         ], config('jwt.key'), self::JWT_ALGORITHM);
+
+        Redis::set($token, $uid, 'EX', $ttl);
+
+        return $token;
     }
 }
