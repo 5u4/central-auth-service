@@ -70,6 +70,8 @@ class AuthController extends Controller
             throw new UnauthorizedHttpException($this->authService::CHALLENGE, 'Invalid credentials.');
         }
 
+        $this->authService->setUserIP(Auth::id(), $request->ip());
+
         $accessToken  = $this->authService->getAccessToken();
         $refreshToken = $this->authService->getRefreshToken();
 
