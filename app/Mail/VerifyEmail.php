@@ -37,7 +37,6 @@ class VerifyEmail extends Mailable
     public function build()
     {
         return $this->subject('senhung.net register verification')
-            ->from(MailService::EMAIL_FROM)
             ->markdown('emails.auth.verify', [
                 'username' => $this->username,
                 'activationUrl' => $this->activationUrl,

@@ -111,7 +111,7 @@ class AuthControllerTest extends TestCase
 
         Mail::assertSent(VerifyEmail::class);
 
-        $verification = Redis::get(MailService::EMAIL_VERIFICATION_KEY . $uid);
+        $verification = Redis::get(config('redis.keys.register_verification') . $uid);
 
         $this->get('api/v1/auth/email/verification?uid=' . $uid . '&verification=' . $verification)
             ->assertStatus(Response::HTTP_OK);
@@ -143,7 +143,7 @@ class AuthControllerTest extends TestCase
             return $mail->hasTo(self::TEST_EMAIL);
         });
 
-        $verification = Redis::get(MailService::EMAIL_VERIFICATION_KEY . $uid);
+        $verification = Redis::get(config('redis.keys.register_verification') . $uid);
 
         $this->get('api/v1/auth/email/verification?uid=' . $uid . '&verification=' . $verification)
             ->assertStatus(Response::HTTP_OK);

@@ -16,10 +16,6 @@ class MailService
 {
     private const DEFAULT_CODE_LENGTH = 32;
 
-    public const EMAIL_FROM = 'noreply@senhung.net';
-    public const EMAIL_VERIFICATION_KEY = 'register.verification.';
-    public const VERIFICATION_EXPIRE_TIME = 3600;
-
     /**
      * @param string $uid
      * @param string $verification
@@ -28,7 +24,7 @@ class MailService
      */
     public function verifyEmailVerificationCode(string $uid, string $verification): bool
     {
-        return Redis::get(self::EMAIL_VERIFICATION_KEY . $uid) === $verification;
+        return Redis::get(config('redis.keys.register_verification') . $uid) === $verification;
     }
 
     /**
@@ -44,7 +40,11 @@ class MailService
 
         $activationUrl = $this->generateActivationUrl($user->id, $verification);
 
-        Redis::set(self::EMAIL_VERIFICATION_KEY . $user->id, $verification, 'EX', self::VERIFICATION_EXPIRE_TIME);
+        Redis::set(
+            config('redis.keys.register_verification') . $user->id,
+            $verification,
+            'EX', config('redis.expire_time.register_verification')
+        );
 
         Mail::to([[
             'email' => $user->email,
