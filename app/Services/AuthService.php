@@ -59,7 +59,7 @@ class AuthService
      * @param string $uid
      * @param string $ip
      */
-    public function setUserIP(string $uid, string $ip)
+    public function setUserIp(string $uid, string $ip)
     {
         Redis::set(self::ACCOUNT_IP_KEY . $uid, $ip);
     }
