@@ -1,0 +1,19 @@
+language: php
+
+php:
+  - 7.2.0
+
+services:
+  - redis-server
+
+before_script:
+  - composer self-update
+  - composer install --no-interaction
+
+script:
+  - vendor/bin/phpunit
+
+branches:
+  only:
+    - master
+    - dev
