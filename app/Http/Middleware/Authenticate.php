@@ -6,6 +6,7 @@ use App\Services\AuthService;
 use Closure;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Class Authenticate
@@ -39,6 +40,10 @@ class Authenticate extends Middleware
     public function handle($request, Closure $next, ...$guards)
     {
         $user = $this->authService->verifyToken($request->bearerToken());
+
+        if ($this->authService->isLoggedIp($user->id, $request->ip()) === false) {
+            throw new AccessDeniedHttpException('User IP does not match with the login IP. Please login again');
+        }
 
         Auth::setUser($user);
 
