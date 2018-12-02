@@ -88,11 +88,36 @@ class AuthControllerTest extends TestCase
         $refreshToken = $this->post('api/v1/auth/login', [
             'username' => self::TEST_USERNAME,
             'password' => self::TEST_PASSWORD,
-        ])->assertStatus(Response::HTTP_OK)->json()['refreshToken'];
+        ])->assertStatus(Response::HTTP_OK)->json('refreshToken');
 
         $this->get('api/v1/auth/token', [
             'Authorization' => 'Bearer ' . $refreshToken,
         ])->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     * @group Auth
+     */
+    public function checkIp()
+    {
+        factory(User::class)->create([
+            'username' => self::TEST_USERNAME,
+            'email'    => self::TEST_EMAIL,
+            'password' => bcrypt(self::TEST_PASSWORD),
+        ]);
+
+        /* Call login to set ip */
+        $refreshToken = $this->call('POST', 'api/v1/auth/login', [
+            'username' => self::TEST_USERNAME,
+            'password' => self::TEST_PASSWORD,
+        ], [], [], ['REMOTE_ADDR' => '10.1.0.1'])->assertStatus(Response::HTTP_OK)->json('refreshToken');
+
+        /* Call refresh token with different ip to test if server rejects */
+        $this->call('GET', 'api/v1/auth/token', [], [], [], $this->transformHeadersToServerVars([
+            'REMOTE_ADDR' => '10.1.0.2',
+            'Authorization' => 'Bearer ' . $refreshToken,
+        ]))->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /**

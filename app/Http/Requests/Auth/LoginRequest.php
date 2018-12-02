@@ -33,4 +33,21 @@ class LoginRequest extends FormRequest
             'password' => 'required|between:8,64',
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'required'         => 'The :attribute field is required',
+            'required_without' => 'The :attribute field is required if :values is not specified',
+            'between'          => 'The :attribute length should be between :min and :max',
+            'alpha_num'        => 'The :attribute field is alphabetical and numerical only',
+            'exists'           => 'The :attribute is not registered yet',
+            'email'            => 'The :attribute should be an email format',
+        ];
+    }
 }
