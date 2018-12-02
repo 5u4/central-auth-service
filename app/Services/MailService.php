@@ -46,7 +46,10 @@ class MailService
 
         Redis::set(self::EMAIL_VERIFICATION_KEY . $user->id, $verification, 'EX', self::VERIFICATION_EXPIRE_TIME);
 
-        Mail::to($user->email)->send(new VerifyEmail($user->username, $activationUrl));
+        Mail::to([[
+            'email' => $user->email,
+            'name'  => $user->username,
+        ]])->send(new VerifyEmail($user->username, $activationUrl));
     }
 
     /**
