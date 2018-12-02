@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\VerifyEmail;
 use App\Models\User;
+use App\Services\MailService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redis;
 use Tests\TestCase;
 
 /**
@@ -25,11 +29,17 @@ class AuthControllerTest extends TestCase
      */
     public function register()
     {
+        Mail::fake();
+
         $this->post('api/v1/auth/register', [
             'username' => self::TEST_USERNAME,
             'email'    => self::TEST_EMAIL,
             'password' => self::TEST_PASSWORD,
         ])->assertStatus(Response::HTTP_CREATED);
+
+        Mail::assertSent(VerifyEmail::class, function (VerifyEmail $mail) {
+            return $mail->hasTo(self::TEST_EMAIL);
+        });
 
         $this->assertDatabaseHas('users', [
             'username'          => self::TEST_USERNAME,
@@ -83,5 +93,61 @@ class AuthControllerTest extends TestCase
         $this->get('api/v1/auth/token', [
             'Authorization' => 'Bearer ' . $refreshToken,
         ])->assertStatus(Response::HTTP_OK);
+    }
+
+    /**
+     * @test
+     * @group Auth
+     */
+    public function verifyEmailRegistration()
+    {
+        Mail::fake();
+
+        $uid = $this->post('api/v1/auth/register', [
+            'username' => self::TEST_USERNAME,
+            'email'    => self::TEST_EMAIL,
+            'password' => self::TEST_PASSWORD,
+        ])->assertStatus(Response::HTTP_CREATED)->json('data.id');
+
+        Mail::assertSent(VerifyEmail::class);
+
+        $verification = Redis::get(MailService::EMAIL_VERIFICATION_KEY . $uid);
+
+        $this->get('api/v1/auth/email/verification?uid=' . $uid . '&verification=' . $verification)
+            ->assertStatus(Response::HTTP_OK);
+
+        $this->assertFalse(User::findOrFail($uid)->email_verified_at === null);
+
+        $this->get('api/v1/auth/email/verification?uid=' . $uid . '&verification=' . $verification)
+            ->assertStatus(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
+     * @test
+     * @group Auth
+     */
+    public function sendVerificationEmail()
+    {
+        Mail::fake();
+
+        $uid = factory(User::class)->create([
+            'username' => self::TEST_USERNAME,
+            'email'    => self::TEST_EMAIL,
+            'password' => bcrypt(self::TEST_PASSWORD),
+            'email_verified_at' => null,
+        ])->id;
+
+        $this->get('api/v1/auth/' . $uid . '/verification/email')->assertStatus(Response::HTTP_OK);
+
+        Mail::assertSent(VerifyEmail::class, function (VerifyEmail $mail) {
+            return $mail->hasTo(self::TEST_EMAIL);
+        });
+
+        $verification = Redis::get(MailService::EMAIL_VERIFICATION_KEY . $uid);
+
+        $this->get('api/v1/auth/email/verification?uid=' . $uid . '&verification=' . $verification)
+            ->assertStatus(Response::HTTP_OK);
+
+        $this->get('api/v1/auth/' . $uid . '/verification/email')->assertStatus(Response::HTTP_FORBIDDEN);
     }
 }
