@@ -17,7 +17,6 @@ class AuthService
     public const CHALLENGE = 'jwt-auth';
 
     private const JWT_ALGORITHM = 'HS256';
-    private const ACCOUNT_IP_KEY = 'account.ip.';
 
     /**
      * @return string
@@ -61,7 +60,7 @@ class AuthService
      */
     public function setUserIp(string $uid, string $ip)
     {
-        Redis::set(self::ACCOUNT_IP_KEY . $uid, $ip);
+        Redis::set(config('redis.keys.last_logged_in_ip') . $uid, $ip);
     }
 
     /**
@@ -74,7 +73,7 @@ class AuthService
      */
     public function isLoggedIp(string $uid, string $requestIp): bool
     {
-        return $requestIp === Redis::get(self::ACCOUNT_IP_KEY . $uid);
+        return $requestIp === Redis::get(config('redis.keys.last_logged_in_ip') . $uid);
     }
 
     /**
@@ -101,7 +100,7 @@ class AuthService
             'uid' => $uid,
         ], config('jwt.key'), self::JWT_ALGORITHM);
 
-        Redis::set($token, $uid, 'EX', $ttl);
+        Redis::set(config('redis.keys.tokens') . $token, $uid, 'EX', $ttl);
 
         return $token;
     }

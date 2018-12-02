@@ -4,7 +4,11 @@ return [
 
     'keys' => [
 
+        'last_logged_in_ip' => 'account.ip.',
+
         'register_verification' => 'register.verification.',
+
+        'tokens' => 'token.',
 
     ],
 
