@@ -79,8 +79,12 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         if (Auth::attempt($request->all()) === false) {
-            throw new UnauthorizedHttpException($this->authService::CHALLENGE, 'Invalid credentials.');
+            throw new UnauthorizedHttpException(
+                $this->authService::CHALLENGE, 'The password does not match the account'
+            );
         }
+
+        $this->authService->setUserIp(Auth::id(), $request->ip());
 
         $accessToken  = $this->authService->getAccessToken();
         $refreshToken = $this->authService->getRefreshToken();
