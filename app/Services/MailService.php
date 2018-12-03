@@ -46,10 +46,7 @@ class MailService
             'EX', config('redis.expire_time.register_verification')
         );
 
-        Mail::to([[
-            'email' => $user->email,
-            'name'  => $user->username,
-        ]])->send(new VerifyEmail($user->username, $activationUrl));
+        Mail::to($user->email)->send(new VerifyEmail($user->username, $activationUrl));
     }
 
     /**
