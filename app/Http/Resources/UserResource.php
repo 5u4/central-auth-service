@@ -22,9 +22,10 @@ class UserResource extends JsonResource
         /** @var User $this */
 
         return [
-            'id'       => $this->id,
+            'id' => $this->id,
             'username' => $this->username,
-            'email'    => $this->email,
+            'email' => $this->email,
+            'verifiedAt' => $this->email_verified_at,
         ];
     }
 }
