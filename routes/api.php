@@ -18,5 +18,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/token', 'AuthController@refreshToken')->middleware('auth');
         Route::post('register', 'AuthController@register');
         Route::post('login', 'AuthController@login');
+        Route::get('email/verification', 'AuthController@verifyEmailRegistration');
+        Route::get('{uid}/verification/email', 'AuthController@sendVerificationEmail');
     });
 });

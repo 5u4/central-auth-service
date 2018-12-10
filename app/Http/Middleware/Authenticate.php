@@ -41,6 +41,10 @@ class Authenticate extends Middleware
     {
         $user = $this->authService->verifyToken($request->bearerToken());
 
+        if ($user->email_verified_at === null) {
+            throw new AccessDeniedHttpException('Please verify your email');
+        }
+
         if ($this->authService->isLoggedIp($user->id, $request->ip()) === false) {
             throw new AccessDeniedHttpException('User IP does not match with the login IP. Please login again');
         }
