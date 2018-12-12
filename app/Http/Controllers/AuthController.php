@@ -84,8 +84,6 @@ class AuthController extends Controller
             );
         }
 
-        $this->authService->setUserIp(Auth::id(), $request->ip());
-
         $accessToken  = $this->authService->getAccessToken();
         $refreshToken = $this->authService->getRefreshToken();
 

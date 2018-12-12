@@ -53,30 +53,6 @@ class AuthService
     }
 
     /**
-     * Record user's ip in redis
-     *
-     * @param string $uid
-     * @param string $ip
-     */
-    public function setUserIp(string $uid, string $ip)
-    {
-        Redis::set(config('redis.keys.last_logged_in_ip') . $uid, $ip);
-    }
-
-    /**
-     * Check if request ip matches the user login ip
-     *
-     * @param string $uid
-     * @param string $requestIp
-     *
-     * @return bool
-     */
-    public function isLoggedIp(string $uid, string $requestIp): bool
-    {
-        return $requestIp === Redis::get(config('redis.keys.last_logged_in_ip') . $uid);
-    }
-
-    /**
      * Make a token
      *
      * @param int $ttl
@@ -100,7 +76,7 @@ class AuthService
             'uid' => $uid,
         ], config('jwt.key'), self::JWT_ALGORITHM);
 
-        Redis::set(config('redis.keys.tokens') . $token, $uid, 'EX', $ttl);
+        Redis::set($token, $uid, 'EX', $ttl);
 
         return $token;
     }

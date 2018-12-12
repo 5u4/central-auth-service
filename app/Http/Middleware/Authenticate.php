@@ -45,10 +45,6 @@ class Authenticate extends Middleware
             throw new AccessDeniedHttpException('Please verify your email');
         }
 
-        if ($this->authService->isLoggedIp($user->id, $request->ip()) === false) {
-            throw new AccessDeniedHttpException('User IP does not match with the login IP. Please login again');
-        }
-
         Auth::setUser($user);
 
         return $next($request);
